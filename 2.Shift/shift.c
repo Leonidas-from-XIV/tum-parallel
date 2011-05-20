@@ -17,6 +17,13 @@ main(int argc, char *argv[])
 
     MPI_Comm_size(MPI_COMM_WORLD, &np);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    if (argc < 2) {
+        if (myid == 0) {
+            printf("No number of shifts given.\n");
+        }
+	MPI_Finalize();
+	exit(0);
+    }
     if (100 % np != 0) {
 	if (myid == 0) {
 	    printf("Error: cannot execute with %d processors!\n", np);
