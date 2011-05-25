@@ -27,8 +27,6 @@ int main(int argc, char **argv)
     int lower_bound = rank * chunksize + 1;
     int upper_bound = lower_bound + chunksize - 1;
 
-    printf("[P%d] Starting from %d ending with %d\n", rank, lower_bound, upper_bound);
-
     for (i = lower_bound; i <= upper_bound; i++) {
         x = w * ((double) i - 0.5);
         sum = sum + f(x);
@@ -37,15 +35,16 @@ int main(int argc, char **argv)
     MPI_Gather(&sum, 1, MPI_DOUBLE, rbuf, 1, MPI_DOUBLE, root, MPI_COMM_WORLD);
 
     if (rank == 0) {
-        printf("[P0] Calculated %g\n", sum);
         for (i = 0; i < np; i++) {
-            printf("[P0] [G%d] %g\n", i, rbuf[i]);
-            acumulator = acumulator + rbuf[i];
+            /* ** compiler bug in GCC -O3 and -O2 **
+             * insert this shit and compile with -O3 or leave it out and use -O1
+             */
+            /*printf("\n"); */
+            /* end of hack */
+            acumulator += rbuf[i];
         }
         pi = w * acumulator;
         printf("computed pi = %24.16g\n", pi);
-    } else {
-        printf("[P%d] Sending %g\n", rank, sum);
     }
 
     MPI_Finalize();
