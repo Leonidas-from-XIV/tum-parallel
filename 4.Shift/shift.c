@@ -62,13 +62,17 @@ main(int argc, char *argv[])
             MPI_Wait(&req_in, &status);
             values[100 / np - 1] = inbuf;
 	} else {
-	    int buf = values[0];
+	    outbuf = values[0];
+	    MPI_Isend(&outbuf, 1, MPI_INT, lnbr, 10, MPI_COMM_WORLD, &req_out);
+	    MPI_Irecv(&inbuf, 1, MPI_INT, rnbr, 10,
+		     MPI_COMM_WORLD, &req_in);
+
 	    for (j = 1; j < 100 / np; j++) {
 		values[j - 1] = values[j];
 	    }
-	    MPI_Recv(&values[100 / np - 1], 1, MPI_INT, rnbr, 10,
-		     MPI_COMM_WORLD, &status);
-	    MPI_Send(&buf, 1, MPI_INT, lnbr, 10, MPI_COMM_WORLD);
+            MPI_Wait(&req_in, &status);
+
+            values[100 / np - 1] = inbuf;
 	}
     }
 
