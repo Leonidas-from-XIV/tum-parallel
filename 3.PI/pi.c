@@ -36,8 +36,7 @@ int main(int argc, char **argv)
 
     MPI_Gather(&sum, 1, MPI_DOUBLE, rbuf, 1, MPI_DOUBLE, root, MPI_COMM_WORLD);
 
-    switch (rank) {
-    case 0:
+    if (rank == 0) {
         printf("[P0] Calculated %g\n", sum);
         for (i = 0; i < np; i++) {
             printf("[P0] [G%d] %g\n", i, rbuf[i]);
@@ -45,10 +44,8 @@ int main(int argc, char **argv)
         }
         pi = w * acumulator;
         printf("computed pi = %24.16g\n", pi);
-        break;
-    default:
+    } else {
         printf("[P%d] Sending %g\n", rank, sum);
-        break;
     }
 
     MPI_Finalize();
