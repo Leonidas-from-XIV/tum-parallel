@@ -64,14 +64,20 @@ main(int argc, char *argv[])
 	}
     }
 
-    int reg[100];
+    int *reg;
     int root = 0;
     int chunksize = 100 / np;
 
+    if (myid == root) {
+        /* only initialize if root process */
+        reg = (int *) calloc(100, sizeof (int));
+    }
     MPI_Gather(values, chunksize, MPI_INT, reg, chunksize, MPI_INT, root, MPI_COMM_WORLD);
+
     if (myid == 0) {
 	for (i = 0; i < 100; i++)
 	    printf(" %2d:%4d\n", i, reg[i]);
     }
+
     MPI_Finalize();
 }
