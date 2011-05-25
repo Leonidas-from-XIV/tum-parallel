@@ -17,46 +17,39 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &np);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // calculate the interval size
-    // old
-    /*
-    w = 1.0 / n;
-    sum = 0.0;
-    for (i = 1; i <= n; i++) {
-	x = w * ((double) i - 0.5);
-	sum = sum + f(x);
-    }
-    pi = w * sum;
-    */
-
-    // new
     w =  1.0 / n;
     sum = 0.0;
-    double sbuf[np];
-    pi = 3;
-    double dummy = 0.0;
+    double rbuf[np];
+    double acumulator;
+    int root = 0;
 
-    chunksize = n / rank;
+    int chunksize = n / np;
+    int lower_bound = rank * chunksize + 1;
+    int upper_bound = lower_bound + chunksize - 1;
+
+    printf("[P%d] Starting from %d ending with %d\n", rank, lower_bound, upper_bound);
+
+    for (i = lower_bound; i <= upper_bound; i++) {
+        x = w * ((double) i - 0.5);
+        sum = sum + f(x);
+    }
+
+    MPI_Gather(&sum, 1, MPI_DOUBLE, rbuf, 1, MPI_DOUBLE, root, MPI_COMM_WORLD);
 
     switch (rank) {
     case 0:
-        //MPI_Reduce(sbuf, &sum, np, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-        MPI_Gather(&dummy, np, MPI_DOUBLE, sbuf, np, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        for (i = 0; i <= np; i++) {
-            sum = sum + sbuf[i];
+        printf("[P0] Calculated %g\n", sum);
+        for (i = 0; i < np; i++) {
+            printf("[P0] [G%d] %g\n", i, rbuf[i]);
+            acumulator = acumulator + rbuf[i];
         }
-        printf("computed pi = %24.16g\n", sum);
+        pi = w * acumulator;
+        printf("computed pi = %24.16g\n", pi);
         break;
     default:
-
-        for (i = 1; i <= n; i++) {
-            x = w * ((double) i - 0.5);
-            sum = sum + f(x);
-        }
-        MPI_Gather(&sum, 1, MPI_DOUBLE, sbuf, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        printf("[P%d] Sending %g\n", rank, sum);
         break;
     }
-
 
     MPI_Finalize();
     return 0;
