@@ -36,8 +36,9 @@ int main(int argc, char **argv)
 
     if (rank == 0) {
         for (i = 0; i < np; i++) {
-            /* ** compiler bug in GCC -O3 and -O2 **
-             * insert this shit and compile with -O3 or leave it out and use -O1
+            /* ** optimizer bug in GCC **
+             * insert this shit and compile with -O3 or you need to add
+             * -fno-caller-save (enabled by -O2) to the code so it compiles
              */
             /*printf("\n"); */
             /* end of hack */
