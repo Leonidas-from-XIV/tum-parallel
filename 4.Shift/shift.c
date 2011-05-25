@@ -49,31 +49,22 @@ main(int argc, char *argv[])
     int outbuf;
 
     for (i = 0; i < shifts; i++) {
-	if (myid == 0) {
-            outbuf = values[0];
-            MPI_Isend(&outbuf, 1, MPI_INT, lnbr, 10, MPI_COMM_WORLD, &req_out);
-            MPI_Irecv(&inbuf, 1, MPI_INT, rnbr, 10,
-		     MPI_COMM_WORLD, &req_in);
+        // save previous value for sending
+        outbuf = values[0];
 
-	    for (j = 1; j < 100 / np; j++) {
-		values[j - 1] = values[j];
-	    }
+        // send and receive in the background
+        MPI_Isend(&outbuf, 1, MPI_INT, lnbr, 10, MPI_COMM_WORLD, &req_out);
+        MPI_Irecv(&inbuf, 1, MPI_INT, rnbr, 10,
+                 MPI_COMM_WORLD, &req_in);
 
-            MPI_Wait(&req_in, &status);
-            values[100 / np - 1] = inbuf;
-	} else {
-	    outbuf = values[0];
-	    MPI_Isend(&outbuf, 1, MPI_INT, lnbr, 10, MPI_COMM_WORLD, &req_out);
-	    MPI_Irecv(&inbuf, 1, MPI_INT, rnbr, 10,
-		     MPI_COMM_WORLD, &req_in);
+        // local computation
+        for (j = 1; j < 100 / np; j++) {
+            values[j - 1] = values[j];
+        }
 
-	    for (j = 1; j < 100 / np; j++) {
-		values[j - 1] = values[j];
-	    }
-            MPI_Wait(&req_in, &status);
-
-            values[100 / np - 1] = inbuf;
-	}
+        // wait for delivery of inbuf so we can set it
+        MPI_Wait(&req_in, &status);
+        values[100 / np - 1] = inbuf;
     }
 
     int *reg;
