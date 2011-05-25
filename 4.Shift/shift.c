@@ -65,19 +65,12 @@ main(int argc, char *argv[])
     }
 
 
+    int reg[np];
+    int root = 0;
+    MPI_Gather(&values[0], 1, MPI_INT, reg, 1, MPI_INT, root, MPI_COMM_WORLD);
     if (myid == 0) {
-	int flag = 1;
-	for (i = 0; i < 100 / np; i++)
-	    printf(" %2d:%4d\n", i, values[i]);
-	MPI_Send(&flag, 1, MPI_INT, rnbr, 20, MPI_COMM_WORLD);
-    } else {
-	int flag;
-	MPI_Recv(&flag, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,
-		 MPI_COMM_WORLD, &status);
-	for (i = 0; i < 100 / np; i++)
-	    printf(" %2d:%4d\n", i + myid * (100 / np), values[i]);
-	if (myid != np - 1)
-	    MPI_Send(&flag, 1, MPI_INT, rnbr, 20, MPI_COMM_WORLD);
+	for (i = 0; i < np; i++)
+	    printf(" %2d:%4d\n", i, reg[i]);
     }
     MPI_Finalize();
 }
