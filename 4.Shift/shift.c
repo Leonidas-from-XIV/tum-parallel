@@ -4,9 +4,11 @@
 
 main(int argc, char *argv[])
 {
-    int myid, np, ierr, lnbr, rnbr, shifts, i, j;
-    int *values;
+    int myid, np, ierr, lnbr, rnbr, shifts, i, j, inbuf, outbuf;
+    int *values, *reg;
     MPI_Status status;
+    MPI_Request req_in, req_out;
+    const int root = 0;
 
     ierr = MPI_Init(&argc, &argv);
     if (ierr != MPI_SUCCESS) {
@@ -18,12 +20,15 @@ main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &np);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
     if (100 % np != 0) {
-	if (myid == 0) {
+	if (myid == root) {
 	    printf("Error: cannot execute with %d processors!\n", np);
 	}
 	MPI_Finalize();
 	exit(0);
     }
+
+    // guaranteed to be integer because of the code above
+    const int chunksize = 100 / np;
 
     if (myid == 0) {
 	lnbr = np - 1;
@@ -40,13 +45,9 @@ main(int argc, char *argv[])
     shifts = atoi(argv[1]);
     values = (int *) calloc(100 / np, sizeof(int));
 
-    if (myid == 0) {
+    if (myid == root) {
 	values[0] = 1;
     }
-
-    MPI_Request req_in, req_out;
-    int inbuf;
-    int outbuf;
 
     for (i = 0; i < shifts; i++) {
         // save previous value for sending
@@ -66,10 +67,6 @@ main(int argc, char *argv[])
         MPI_Wait(&req_in, &status);
         values[100 / np - 1] = inbuf;
     }
-
-    int *reg;
-    int root = 0;
-    int chunksize = 100 / np;
 
     if (myid == root) {
         /* only initialize if root process */
