@@ -64,12 +64,13 @@ main(int argc, char *argv[])
 	}
     }
 
-
-    int reg[np];
+    int reg[100];
     int root = 0;
-    MPI_Gather(&values[0], 1, MPI_INT, reg, 1, MPI_INT, root, MPI_COMM_WORLD);
+    int chunksize = 100 / np;
+
+    MPI_Gather(values, chunksize, MPI_INT, reg, chunksize, MPI_INT, root, MPI_COMM_WORLD);
     if (myid == 0) {
-	for (i = 0; i < np; i++)
+	for (i = 0; i < 100; i++)
 	    printf(" %2d:%4d\n", i, reg[i]);
     }
     MPI_Finalize();
