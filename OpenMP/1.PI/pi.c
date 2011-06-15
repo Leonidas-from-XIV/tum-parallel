@@ -15,15 +15,17 @@ int main(int argc, char **argv)
     double ts, te;
     volatile double x;
 
-/* calculate the interval size */
+    /* calculate the interval size */
     w = (double) 1.0 / (double) n;
     sum = 0.0;
     ts = omp_get_wtime();
 
+#pragma omp parallel for private(x) reduction(+:sum)
     for (i = 1; i <= n; i++) {
 	x = w * ((double) i - 0.5);
 	sum = sum + f(x);
     }
+
     pi = w * sum;
     te = omp_get_wtime();
 
