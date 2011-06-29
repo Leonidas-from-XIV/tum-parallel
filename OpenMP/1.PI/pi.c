@@ -20,10 +20,13 @@ int main(int argc, char **argv)
     sum = 0.0;
     ts = omp_get_wtime();
 
-#pragma omp parallel for private(x) reduction(+:sum)
+#pragma omp parallel for private(x)
     for (i = 1; i <= n; i++) {
 	x = w * ((double) i - 0.5);
+#pragma omp critical
+        {
 	sum = sum + f(x);
+        }
     }
 
     pi = w * sum;
