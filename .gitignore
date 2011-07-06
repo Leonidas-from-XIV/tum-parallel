@@ -2,6 +2,7 @@ hello
 shift
 pi
 io
+euler
 *.swp
 *.o
 *~

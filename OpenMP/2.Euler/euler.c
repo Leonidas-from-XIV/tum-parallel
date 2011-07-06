@@ -1,5 +1,8 @@
 #include <stdio.h>
 #define M 4000000
+
+#undef M
+#define M 400000
 void main()
 {
     double uc[M + 1], un[M + 1];
@@ -14,19 +17,26 @@ void main()
     r = dt / (dx * dx);
     r1 = 1 - 2 * r;
 
+#pragma omp parallel for
     for (i = 0; i < M; i++) {
 	uc[i] = 1.0;
     }
 
     uc[0] = 0.0;
     uc[M] = 0.0;
+
+    /* work happens here */
     for (j = 0; j < timcnt; j++) {
-	for (i = 1; i < M; i++) {
-	    un[i] = r * (uc[i - 1] + uc[i + 1]) + r1 * uc[i];
-	}
-	for (i = 1; i < M; i++) {
-	    uc[i] = un[i];
-	}
+        {
+#pragma omp for
+            for (i = 1; i < M; i++) {
+                un[i] = r * (uc[i - 1] + uc[i + 1]) + r1 * uc[i];
+            }
+#pragma omp for
+            for (i = 1; i < M; i++) {
+                uc[i] = un[i];
+            }
+        }
     }
 
     double sum = 0.0;
