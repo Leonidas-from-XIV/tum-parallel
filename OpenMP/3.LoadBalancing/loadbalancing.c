@@ -17,7 +17,7 @@ void main()
     char fieldc[N_R][N_I];
     float v_r, v_i;
     float v_r_step, v_i_step;
-    char schedenv[13] = "OMP_SCHEDULE";
+    char schedenv[] = "OMP_SCHEDULE";
     char *sched;
     int i, j;
     double* time_per_thread;
