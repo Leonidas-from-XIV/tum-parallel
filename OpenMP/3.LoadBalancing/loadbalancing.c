@@ -67,9 +67,8 @@ void main()
     }
     printf("%s=%s\n", schedenv, sched);
 
-    for (i = 0; i < num_threads; i++) {
-        printf("Execution time of thread %d: %f\n", i+1, time_per_thread[i]);
-    }
+#pragma omp parallel
+    printf("Execution time of thread %d: %f\n", omp_get_thread_num() + 1, time_per_thread[omp_get_thread_num()]);
 }
 
 #define CMAX 10000
