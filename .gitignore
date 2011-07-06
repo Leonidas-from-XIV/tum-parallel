@@ -3,6 +3,7 @@ shift
 pi
 io
 euler
+loadbalancing
 *.swp
 *.o
 *~
