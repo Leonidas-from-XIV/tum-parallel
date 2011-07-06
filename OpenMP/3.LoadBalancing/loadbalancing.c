@@ -22,6 +22,7 @@ void main()
     int i, j;
     double* time_per_thread;
     int num_threads;
+    double start, end;
 
     sched = getenv(schedenv);
     v_r_step = (V_R_MAX - V_R_MIN) / N_R;
@@ -39,14 +40,13 @@ void main()
 
     for (i = 1; i <= N_R; i++) {
 	v_r = V_R_MIN + (i - 1) * v_r_step;
-#pragma omp parallel for
+#pragma omp parallel for private(start, end)
 	for (j = 1; j <= N_I; j++) {
 	    v_i = V_I_MIN + (j - 1) * v_i_step;
-            double start = omp_get_wtime();
+            start = omp_get_wtime();
 	    field[i - 1][j - 1] = icalman(v_r, v_i);
-            double end = omp_get_wtime();
-            int current_thread = omp_get_thread_num();
-            time_per_thread[current_thread] += end - start;
+            end = omp_get_wtime();
+            time_per_thread[omp_get_thread_num()] += end - start;
 	}
     }
 
