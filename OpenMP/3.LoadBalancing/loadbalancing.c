@@ -11,7 +11,7 @@
 #define V_I_MAX  1.0
 static int icalman(float, float);
 
-void main()
+int main()
 {
     int field[N_R][N_I];
     char fieldc[N_R][N_I];
@@ -69,6 +69,8 @@ void main()
 
 #pragma omp parallel
     printf("Execution time of thread %d: %f\n", omp_get_thread_num() + 1, time_per_thread[omp_get_thread_num()]);
+
+    return 0;
 }
 
 #define CMAX 10000

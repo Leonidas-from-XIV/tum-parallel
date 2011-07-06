@@ -3,7 +3,8 @@
 
 #undef M
 #define M 400000
-void main()
+
+int main()
 {
     double uc[M + 1], un[M + 1];
     double r, r1, dx, dt;
@@ -44,4 +45,6 @@ void main()
 	sum = sum + uc[i];
     }
     printf("sum  %9.8f\n", sum);
+
+    return 0;
 }
